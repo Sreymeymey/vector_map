@@ -6,14 +6,9 @@ import 'package:vector_map/map/src/theme/map_theme.dart';
 
 /// Layer for [VectorMap].
 class MapLayer {
-  MapLayer(
-      {int? id,
-      required this.dataSource,
-      MapTheme? theme,
-      this.highlightTheme,
-      this.name})
-      : this.id = id != null ? id : _randomId(),
-        this.theme = theme != null ? theme : MapTheme();
+  MapLayer({int? id, required this.dataSource, MapTheme? theme, this.highlightTheme, this.name})
+      : id = id ?? _randomId(),
+        theme = theme ?? MapTheme();
 
   final int id;
   final MapDataSource dataSource;

@@ -6,8 +6,8 @@ class PropertyLimits {
   double _min;
 
   PropertyLimits(double value)
-      : this._max = value,
-        this._min = value;
+      : _max = value,
+        _min = value;
 
   double get max => _max;
 

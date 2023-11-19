@@ -9,13 +9,10 @@ import 'package:vector_map/map/src/error.dart';
 
 /// Defines a circle marker to be painted on the map.
 class CircleMaker extends Marker {
-  CircleMaker(
-      {required Offset offset,
-      required double radius,
-      required double scaledRadius})
-      : this._bounds = Rect.fromLTWH(offset.dx - scaledRadius,
-            offset.dy - scaledRadius, scaledRadius * 2, scaledRadius * 2),
-        this._radius = radius,
+  CircleMaker({required Offset offset, required double radius, required double scaledRadius})
+      : _bounds = Rect.fromLTWH(
+            offset.dx - scaledRadius, offset.dy - scaledRadius, scaledRadius * 2, scaledRadius * 2),
+        _radius = radius,
         super(offset: offset);
 
   final Rect _bounds;
@@ -51,8 +48,7 @@ class CircleMakerBuilder {
   }
 
   /// Builds a circle marker by mapping a property value to a radius.
-  static MarkerBuilder map(
-      {required String key, required Map<dynamic, double> radiuses}) {
+  static MarkerBuilder map({required String key, required Map<dynamic, double> radiuses}) {
     return _MappedValues(key: key, radiuses: radiuses);
   }
 
@@ -65,9 +61,7 @@ class CircleMakerBuilder {
   /// Builds a circle marker by proportionally mapping property
   /// values to defined minimum and maximum values.
   static MarkerBuilder proportion(
-      {required String key,
-      required double minRadius,
-      required double maxRadius}) {
+      {required String key, required double minRadius, required double maxRadius}) {
     if (maxRadius <= minRadius) {
       throw VectorMapError('maxRadius must be bigger than minRadius');
     }
@@ -87,8 +81,7 @@ class _FixedRadius extends MarkerBuilder {
       required MapFeature feature,
       required Offset offset,
       required double scale}) {
-    return CircleMaker(
-        offset: offset, radius: radius, scaledRadius: radius / scale);
+    return CircleMaker(offset: offset, radius: radius, scaledRadius: radius / scale);
   }
 }
 
@@ -137,8 +130,7 @@ class _Property extends MarkerBuilder {
 }
 
 class _Proportion extends MarkerBuilder {
-  _Proportion(
-      {required this.key, required this.minRadius, required this.maxRadius});
+  _Proportion({required this.key, required this.minRadius, required this.maxRadius});
 
   final String key;
   final double minRadius;
@@ -156,15 +148,13 @@ class _Proportion extends MarkerBuilder {
     if (propertyLimits != null) {
       dynamic dynamicValue = feature.getValue(key);
       if (dynamicValue is int) {
-        radius = _radius(
-            propertyLimits.min, propertyLimits.max, dynamicValue.toDouble());
+        radius = _radius(propertyLimits.min, propertyLimits.max, dynamicValue.toDouble());
       } else if (dynamicValue is double) {
         radius = _radius(propertyLimits.min, propertyLimits.max, dynamicValue);
       }
     }
 
-    return CircleMaker(
-        offset: offset, radius: radius, scaledRadius: radius / scale);
+    return CircleMaker(offset: offset, radius: radius, scaledRadius: radius / scale);
   }
 
   double _radius(double minValue, double maxValue, double dynamicValue) {

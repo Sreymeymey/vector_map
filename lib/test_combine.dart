@@ -1,127 +1,186 @@
 import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vector_map/Model/ModelApi/model_api.dart';
-import 'package:vector_map/Model/ModelLocal/model_local.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part "test_combine.g.dart";
+
+@JsonSerializable()
+class Property {
+  @JsonKey(name: "province_name")
+  String? provinceEg;
+
+  @JsonKey(name: "province_kh")
+  String? provinceKh;
+
+  Property();
+  factory Property.fromJson(Map<String, dynamic> json) => _$PropertyFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PropertyToJson(this);
+
+  @override
+  String toString() => 'Property(provinceEg: $provinceEg, provinceKh: $provinceKh)';
+}
+
+@JsonSerializable()
+class Geometry {
+  @JsonKey(name: "type")
+  String? type;
+
+  @JsonKey(name: "coordinates", fromJson: _parseCoordinates)
+  List<List<List<double>>>? coordinates;
+
+  // Parse coordinates, some of them are having incorrect type
+  static List<List<List<double>>>? _parseCoordinates(List<dynamic>? coordinates) {
+    if (coordinates == null) {
+      return null;
+    }
+
+    return coordinates.map((e) {
+      return (e as List<dynamic>).map((e) {
+        return (e as List<dynamic>).map((e) {
+          if (e is List<dynamic>) {
+            return (e.first as double).toDouble();
+          }
+          return (e as double).toDouble();
+        }).toList();
+      }).toList();
+    }).toList();
+  }
+
+  Geometry();
+  factory Geometry.fromJson(Map<String, dynamic> json) => _$GeometryFromJson(json);
+
+  Map<String, dynamic> toJson() => _$GeometryToJson(this);
+
+  @override
+  String toString() {
+    return 'Geometry(type: $type, total coordinates: ${coordinates?.length} items)';
+  }
+}
+
+@JsonSerializable()
+class MapModel {
+  @JsonKey(name: "id")
+  String? id;
+
+  @JsonKey(name: "dataView")
+  int? dataView;
+
+  @JsonKey(name: "type")
+  String? featureType;
+
+  @JsonKey(name: "properties")
+  Property? property;
+
+  @JsonKey(name: "geometry")
+  Geometry? geometry;
+
+  @JsonKey(name: "api_id")
+  String? apiId;
+
+  MapModel();
+  factory MapModel.fromJson(Map<String, dynamic> json) => _$MapModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MapModelToJson(this);
+
+  @override
+  String toString() {
+    // return new line to make it easier to read
+    return 'MapModel(\n\tid: $id, \n\tdataView: $dataView, \n\tfeatureType: $featureType, \n\tproperty: $property, \n\tgeometry: $geometry\n)';
+  }
+}
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: FutureBuilder(
-          future: dataLocal(),
-          builder: (context, data) {
-            if (data.hasError) {
-              return Center(child: Text("${data.error}"));
-            } else if (data.hasData) {
-              var items = data.data as List<MapLocal>;
-              return ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Column(
-                    children: [
-                      ListTile(
-                        title: Text('${items[index].id}'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          },
-        ));
+      appBar: AppBar(
+        title: const Text("Test Combine"),
+        centerTitle: true,
+      ),
+      body: FutureBuilder<List<MapModel>>(
+        future: loadMapData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final item = snapshot.data![index];
 
-        }
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Text(item.id.toString()),
+                        Text(item.apiId?.toString() ?? "No Match"),
+                        Text(item.dataView?.toString() ?? "No Match"),
+                        Text(item.property!.provinceEg.toString()),
+                        Text(item.property!.provinceKh.toString()),
+                        Text(item.geometry!.type.toString()),
+                        if (item.geometry!.coordinates != null)
+                          Text("${item.geometry!.coordinates!.length} items"),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }
 
+          if (snapshot.hasError) {
+            log("Error: ${snapshot.error}", error: snapshot.error);
+            return Center(child: Text(snapshot.error.toString(), textAlign: TextAlign.center));
+          }
 
-  /// Map local
-  List<MapLocal>? mapLocalData;
-
-  /// data load year from json asset
-  Future<List<MapLocal>> dataLocal() async {
-    final jsonString = await rootBundle.loadString('assets/cambodiamap.json');
-    final jsonData = jsonDecode(jsonString)['features'] as List<dynamic>;
-    mapLocalData = jsonData.map((item) => MapLocal.fromJson(item)).toList(); // Update the dropdown list data
-    return mapLocalData!;
-  }
-
-
-  /// Map local
-  List<MapApi>? mapApiData;
-
-  /// data load year from json asset
-  Future<List<MapApi>> dataAPI() async {
-    final jsonString = await rootBundle.loadString('assets/mapData.json');
-    final jsonData = jsonDecode(jsonString)['data'] as List<dynamic>;
-    mapApiData = jsonData.map((item) => MapApi.fromJson(item))
-        .toList(); // Update the dropdown list data
-    return mapApiData!;
-  }
-
-  /// function combine [MapAPI] and [MapLocal] by id
-void _setCombine() async {
-  final List<MapLocal> localItems = await dataLocal();
-  final List<MapApi> apiItems = await dataAPI();
-
-  for (final localElement in localItems) {
-    for (final apiElement in apiItems) {
-      if (localElement.id != apiElement.id) {
-        apiElement.id = apiElement.id?.replaceAll("R_", "");
-        debugPrint(apiElement.id);
-      } else {
-       // apiItems.addAll(localItems);
-      }
-    }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
+    );
   }
 }
 
-
-/// Solution 2
-//   void main() {
-//     // Sample JSON strings
-//     String jsonLocal = '';
-//     String jsonApi = '';
-//
-//     // Parse JSON strings
-//     var dataLocal = json.decode(jsonLocal);
-//     var dataAPI = json.decode(jsonApi);
-//
-//     // Compare and merge if necessary
-//     if (dataLocal['id'] == dataAPI['id']) {
-//       // Merge the contents of json1Data into json2Data
-//       dataAPI.addAll(dataLocal);
-//
-//       print('Merge successful!');
-//       print(json.encode(dataLocal));
-//     } else {
-//       print('ID fields do not match. Merge aborted.');
-//     }
-//   }
-
-
+Future<List<Map<String, dynamic>>> _loadJsonData(String path, String key) async {
+  final raw = await rootBundle.loadString(path);
+  final decoded = jsonDecode(raw);
+  return (decoded[key] as List<dynamic>).cast<Map<String, dynamic>>();
 }
 
+Future<List<MapModel>> loadMapData() async {
+  final localItems = await _loadJsonData("assets/cambodiamap.json", "features");
+  final apiItems = await _loadJsonData("assets/mapData.json", "data");
 
+  final mergedItems = <Map<String, dynamic>>[];
 
+  // Use local as base
+  for (final local in localItems) {
+    final id = local["id"];
+    final matchedApiById = apiItems.firstWhere(
+      (api) {
+        final formattedId = api["id"].toString().replaceAll('R_', "").padLeft(2, "0");
+        return formattedId == id;
+      },
+      orElse: () => {},
+    );
 
+    mergedItems.add({
+      ...local,
+      ...matchedApiById
+        ..addAll({"api_id": matchedApiById["id"]})
+        ..remove("id"),
+    });
+  }
 
-
-
-
-
-
+  return mergedItems.map((e) => MapModel.fromJson(e)).toList();
+}
