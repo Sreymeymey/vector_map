@@ -1,0 +1,98 @@
+{
+    "status": 200,
+    "success": "Success",
+    "data": [
+        {
+            "id": "R_06",
+            "dataView": 39000
+        },
+        {
+            "id": "R_13",
+            "dataView": 123456
+        },
+        {
+            "id": "R_07",
+            "dataView": 39000
+        },
+        {
+            "id": "R_8",
+            "dataView": 123456
+        },
+        {
+            "id": "R_9",
+            "dataView": 123456
+        },
+        {
+            "id": "R_10",
+            "dataView": 123456
+        },
+        {
+            "id": "R_11",
+            "dataView": 123456
+        },
+        {
+            "id": "R_12",
+            "dataView": 123456
+        },
+        {
+            "id": "R_13",
+            "dataView": 123456
+        },
+        {
+            "id": "R_14",
+            "dataView": 123456
+        },
+        {
+            "id": "R_15",
+            "dataView": 123456
+        },
+        {
+            "id": "R_16",
+            "dataView": 123456
+        },
+        {
+            "id": "R_17",
+            "dataView": 123456
+        },
+        {
+            "id": "R_18",
+            "dataView": 123456
+        },
+        {
+            "id": "R_16",
+            "dataView": 123456
+        },
+        {
+            "id": "R_19",
+            "dataView": 123456
+        },
+        {
+            "id": "R_20",
+            "dataView": 123456
+        },
+        {
+            "id": "R_21",
+            "dataView": 123456
+        },
+        {
+            "id": "R_22",
+            "dataView": 123456
+        },
+        {
+            "id": "R_22",
+            "dataView": 123456
+        },
+        {
+            "id": "R_23",
+            "dataView": 123456
+        },
+        {
+            "id": "R_24",
+            "dataView": 123456
+        },
+        {
+            "id": "R_25",
+            "dataView": 123456
+        }
+    ]
+}
